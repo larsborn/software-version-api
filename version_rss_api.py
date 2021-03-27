@@ -50,7 +50,7 @@ class WordpressPlugin(VersionPlugin):
                 return version
 
 
-class GithubRealeases(VersionPlugin, abc.ABC):
+class GithubReleases(VersionPlugin, abc.ABC):
     VERSION_BLOCKLIST = ['beta', 'rc']
 
     def __call__(self) -> Optional[str]:
@@ -80,7 +80,14 @@ class GithubRealeases(VersionPlugin, abc.ABC):
         raise NotImplementedError
 
 
-class SignalCliPlugin(GithubRealeases):
+class GithubReleasesWithVPrefixAndSemVer(GithubReleases, abc.ABC):
+    def version_from_title(self, title: str) -> Optional[str]:
+        title = title.strip('v')
+        if self.semver_regex.match(title):
+            return title
+
+
+class SignalCliPlugin(GithubReleases):
     @property
     def software_name(self):
         return 'signal-cli'
@@ -98,7 +105,7 @@ class SignalCliPlugin(GithubRealeases):
             return title[8:]
 
 
-class NextCloudPlugin(GithubRealeases):
+class NextCloudPlugin(GithubReleasesWithVPrefixAndSemVer):
     @property
     def software_name(self):
         return 'nextcloud'
@@ -111,12 +118,8 @@ class NextCloudPlugin(GithubRealeases):
     def repo(self) -> str:
         return 'server'
 
-    def version_from_title(self, title: str) -> Optional[str]:
-        if title.startswith('v'):
-            return title[1:]
 
-
-class RoundcubePlugin(GithubRealeases):
+class RoundcubePlugin(GithubReleases):
     @property
     def software_name(self):
         return 'roundcube'
@@ -134,7 +137,7 @@ class RoundcubePlugin(GithubRealeases):
             return title[18:]
 
 
-class RainloopPlugin(GithubRealeases):
+class RainloopPlugin(GithubReleasesWithVPrefixAndSemVer):
     @property
     def software_name(self):
         return 'rainloop'
@@ -147,13 +150,8 @@ class RainloopPlugin(GithubRealeases):
     def repo(self) -> str:
         return 'rainloop-webmail'
 
-    def version_from_title(self, title: str) -> Optional[str]:
-        title = title.strip('v')
-        if self.semver_regex.match(title):
-            return title
 
-
-class DolibarrPlugin(GithubRealeases):
+class DolibarrPlugin(GithubReleases):
     @property
     def software_name(self):
         return 'dolibarr'
@@ -170,7 +168,7 @@ class DolibarrPlugin(GithubRealeases):
         return title
 
 
-class HumhubPlugin(GithubRealeases):
+class HumhubPlugin(GithubReleases):
     @property
     def software_name(self):
         return 'humhub'
@@ -187,7 +185,7 @@ class HumhubPlugin(GithubRealeases):
         return title
 
 
-class FroxlorPlugin(GithubRealeases):
+class FroxlorPlugin(GithubReleases):
     @property
     def software_name(self):
         return 'froxlor'
@@ -205,6 +203,20 @@ class FroxlorPlugin(GithubRealeases):
             return title.split(' ')[1]
 
 
+class CyberchefPlugin(GithubReleasesWithVPrefixAndSemVer):
+    @property
+    def software_name(self):
+        return 'cyberchef'
+
+    @property
+    def user(self) -> str:
+        return 'gchq'
+
+    @property
+    def repo(self) -> str:
+        return 'CyberChef'
+
+
 app = Flask(__name__)
 USER_AGENT = F'{__service__}/{__version__}'
 
@@ -220,5 +232,6 @@ def most_recent():
         HumhubPlugin,
         FroxlorPlugin,
         RainloopPlugin,
+        CyberchefPlugin,
     ]]
     return jsonify(dict((pluign.software_name, pluign()) for pluign in plugins))
