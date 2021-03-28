@@ -217,6 +217,20 @@ class CyberchefPlugin(GithubReleasesWithVPrefixAndSemVer):
         return 'CyberChef'
 
 
+class ArangoDBPlugin(GithubReleasesWithVPrefixAndSemVer):
+    @property
+    def software_name(self):
+        return 'arangodb'
+
+    @property
+    def user(self) -> str:
+        return 'arangodb'
+
+    @property
+    def repo(self) -> str:
+        return 'ArangoDB'
+
+
 app = Flask(__name__)
 USER_AGENT = F'{__service__}/{__version__}'
 
@@ -233,5 +247,6 @@ def most_recent():
         FroxlorPlugin,
         RainloopPlugin,
         CyberchefPlugin,
+        ArangoDBPlugin,
     ]]
     return jsonify(dict((pluign.software_name, pluign()) for pluign in plugins))
