@@ -231,6 +231,29 @@ class ArangoDBPlugin(GithubReleasesWithVPrefixAndSemVer):
         return 'ArangoDB'
 
 
+class GhidraPlugin(GithubReleases):
+    def __init__(self, user_agent: str):
+        super().__init__(user_agent)
+        self.r = re.compile(r'Ghidra_(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})_build')
+
+    @property
+    def software_name(self):
+        return 'Ghidra'
+
+    @property
+    def user(self) -> str:
+        return 'NationalSecurityAgency'
+
+    @property
+    def repo(self) -> str:
+        return 'ghidra'
+
+    def version_from_title(self, title: str) -> str:
+        m = self.r.match(title)
+        if m:
+            return m.group('version')
+
+
 app = Flask(__name__)
 USER_AGENT = F'{__service__}/{__version__}'
 
@@ -248,5 +271,6 @@ def most_recent():
         RainloopPlugin,
         CyberchefPlugin,
         ArangoDBPlugin,
+        GhidraPlugin,
     ]]
     return jsonify(dict((pluign.software_name, pluign()) for pluign in plugins))
