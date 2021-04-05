@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+"""
+Script to integrate the API shipped with this repository with Zabbix. See the following blag for details:
+
+https://blag.nullteilerfrei.de/2021/03/25/zabbix-use-low-level-discovery-for-software-update-notifications/
+"""
 import json
 import os
 import subprocess
 import logging
 import re
-import sys
 from typing import List
 
 import requests
