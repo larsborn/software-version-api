@@ -254,6 +254,29 @@ class GhidraPlugin(GithubReleases):
             return m.group('version')
 
 
+class YaraPlugin(GithubReleases):
+    def __init__(self, user_agent: str):
+        super().__init__(user_agent)
+        self.r = re.compile(r'YARA v(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})')
+
+    @property
+    def software_name(self):
+        return 'YARA'
+
+    @property
+    def user(self) -> str:
+        return 'VirusTotal'
+
+    @property
+    def repo(self) -> str:
+        return 'yara'
+
+    def version_from_title(self, title: str) -> str:
+        m = self.r.match(title)
+        if m:
+            return m.group('version')
+
+
 app = Flask(__name__)
 USER_AGENT = F'{__service__}/{__version__}'
 
@@ -272,5 +295,6 @@ def most_recent():
         CyberchefPlugin,
         ArangoDBPlugin,
         GhidraPlugin,
+        YaraPlugin,
     ]]
     return jsonify(dict((pluign.software_name, pluign()) for pluign in plugins))
